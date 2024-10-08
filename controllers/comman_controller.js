@@ -44,8 +44,7 @@ module.exports.insertUser = async (req, res) => {
         });
       }
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.log(error.message.bgRed.white);
     res.status(500).send({
       success: false,
@@ -62,6 +61,9 @@ module.exports.loginUser = async (req, res) => {
       email,
     ]);
 
+    console.log(user.rows[0].id);
+    const id = user.rows[0].id;
+
     if (user.rowCount === 0) {
       return res.status(400).send({
         success: false,
@@ -77,7 +79,7 @@ module.exports.loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: id }, JWT_SECRET, { expiresIn: "24h" });
 
     res.status(200).send({
       success: true,

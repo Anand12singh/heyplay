@@ -29,6 +29,8 @@ const JWT_SECRET = "AnandSingh";
 
 const verifyToken = (req, res, next) => {
   const token = req.header("Authorization");
+  console.log(token);
+
   if (!token) {
     return res.status(401).send({
       success: false,
@@ -37,8 +39,12 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    const split = token.split(" ");
+    console.log(`split token ${split[1]}`);
+    const tokens = split[1];
+    const decoded = jwt.verify(tokens, JWT_SECRET);
+    req.user_id = decoded.id;
+    console.log(`Decoded User: ${req.user_id}`);
     next();
   } catch (error) {
     console.log(error.message, colors.bgRed.white);
@@ -48,6 +54,5 @@ const verifyToken = (req, res, next) => {
     });
   }
 };
-module.exports = verifyToken;
 
-module.exports = { requestLogger, validateRequestBody };
+module.exports = { requestLogger, validateRequestBody, verifyToken };
