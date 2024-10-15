@@ -1,3 +1,4 @@
+const { bgRed } = require("colors");
 const db = require("../database/db");
 
 module.exports.insertcatogrys = async (req, res) => {
@@ -650,40 +651,67 @@ module.exports.addclass = async (req, res) => {
       class_category,
       class_formate,
       class_mode,
-      created_by,
       additinal_information,
-      image_1,
-      image_2,
-      image_3,
-      image_4,
-      image_5,
+      // images0,
+      //   images1,
+      //   images2,
+      //   images3,
+      //   images4
     } = req.body;
 
+    // Get the uploaded image paths
+    const images = req.files.map((file) => file.path);
+    console.log("Uploaded Image Paths:", images); // Log the image paths
+
+    // Construct a SQL query to insert the class information along with image paths
     const addclass = await db.query(
-      "insert into heyplay_add_class(class_name,class_description,class_category,class_formate,class_mode,created_by,additinal_information,image_1,image_2,image_3,image_4,image_5)Values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
+      `INSERT INTO heyplay_add_class(
+        class_name, 
+        class_description, 
+        class_category, 
+        class_formate, 
+        class_mode, 
+        created_by, 
+        additinal_information,
+        images0, 
+        images1, 
+        images2, 
+        images3, 
+        images4
+      ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         class_name,
         class_description,
         class_category,
         class_formate,
         class_mode,
-        req.user_id,
+        req.user_id, // Assuming you're using req.user_id for the creator
         additinal_information,
+        images[0] || null,
+        images[1] || null,
+        images[2] || null,
+        images[3] || null,
+        images[4] || null,
       ]
     );
+
     if (addclass.rowCount > 0) {
       res.status(200).send({
         success: true,
-        message: "class add successfully",
+        message: "Class added successfully",
       });
     } else {
-      res.status(200).send({
-        success: true,
-        message: "somthing went wrong",
+      res.status(400).send({
+        success: false,
+        message: "Something went wrong",
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
+    res.status(500).send({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 

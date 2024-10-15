@@ -1,6 +1,7 @@
 const route = require("express").Router();
 const controllers = require("../controllers/comman_controller");
 const mastercontroller = require("../controllers/master_controller");
+const upload = require("../middlewares/uploadMiddleware");
 
 const {
   requestLogger,
@@ -79,7 +80,16 @@ route.delete(
 );
 
 //heyplay_add_class
-route.post("/addclass", verifyToken, mastercontroller.addclass);
+route.post(
+  "/addclass",
+  verifyToken,
+  upload.array("images", 5),
+  mastercontroller.addclass,
+  (req, res) => {
+    // console.log("Request Body:", req.body);
+    // console.log("Uploaded Files:", req.files);
+  }
+);
 route.get("/getclass", verifyToken, mastercontroller.getclass);
 
 module.exports = route;
