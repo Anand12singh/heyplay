@@ -91,5 +91,6 @@ route.post(
   }
 );
 route.get("/getclass", verifyToken, mastercontroller.getclass);
+route.get("/getaddjoin", verifyToken, mastercontroller.addclassjoing);
 
 module.exports = route;

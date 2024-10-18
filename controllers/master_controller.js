@@ -738,3 +738,38 @@ module.exports.getclass = async (req, res) => {
     console.log(error);
   }
 };
+
+//add class joing
+
+module.exports.addclassjoing = async (req, res) => {
+  try {
+    const addclassjoingc = await db.query(
+      `SELECT addclass.id,addclass.class_name,addclass.status,cat.category_name,hcg.class_format,cm.class_mode
+       FROM heyplay_add_class AS addclass
+       LEFT JOIN heyplay_category AS cat ON addclass.class_category = cat.id
+       LEFT JOIN heyplay_class_formate_master AS hcg ON addclass.class_formate = hcg.id
+       LEFT JOIN heyplay_class_mode AS cm ON addclass.class_mode =cm.id     
+       `
+    );
+
+    if (addclassjoingc.rowCount > 0) {
+      res.status(200).send({
+        success: true,
+        message: "Data retrieved successfully",
+        data: addclassjoingc.rows,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "No record found",
+        data: addclassjoingc.rows,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Server error",
+    });
+    console.log(error);
+  }
+};
