@@ -773,3 +773,158 @@ module.exports.addclassjoing = async (req, res) => {
     console.log(error);
   }
 };
+
+//heyplay_selecte_day
+
+module.exports.addselectday = async (req, res) => {
+  try {
+    const { day_name } = req.body;
+
+    const isday_exist = await db.query(
+      "select *from heyplay_selecte_day where day_name=$1",
+      [day_name]
+    );
+
+    if (isday_exist.rowCount > 0) {
+      res.status(200).send({
+        success: false,
+        message: "alredy exist",
+      });
+    } else {
+      const insertselect = await db.query(
+        "insert into heyplay_selecte_day(day_name)Values($1)",
+        [day_name]
+      );
+      if (insertselect.rowCount > 0) {
+        res.status(200).send({
+          success: true,
+          message: "name add successfully",
+          data: insertselect.rows,
+        });
+      } else {
+        res.status(400).send({
+          success: false,
+          message: "somthing went wrong",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "server not response",
+    });
+    console.log(error);
+  }
+};
+
+module.exports.getaddday = async (req, res) => {
+  const getdate = await db.query("select *from heyplay_selecte_day");
+  if (getdate.rowCount > 0) {
+    res.status(200).send({
+      success: true,
+      message: "get data",
+      data: getdate.rows,
+    });
+  } else {
+    res.status(200).send({
+      success: true,
+      message: "no data found",
+    });
+  }
+};
+
+//heyplay_batch_master
+
+module.exports.addbatchmaster = async (req, res) => {
+  try {
+    const {
+      class_name_id,
+      occurrence_id,
+      selected_days_id,
+      batch_start_date,
+      batch_end_date,
+      class_time,
+      duration_class_time,
+      age_group_id,
+      batch_size,
+      name_instructor,
+      price,
+    } = req.body;
+
+    // Insert the data into the heyplay_batch_master table
+    const insertBatch = await db.query(
+      `INSERT INTO heyplay_batch_master (
+          class_name_id, 
+          occurrence_id, 
+          selected_days_id, 
+          batch_start_date, 
+          batch_end_date, 
+          class_time, 
+          duration_class_time, 
+          age_group_id, 
+          batch_size, 
+          name_instructor, 
+          price
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+     `,
+      [
+        class_name_id,
+        occurrence_id,
+        selected_days_id,
+        batch_start_date,
+        batch_end_date,
+        class_time,
+        duration_class_time,
+        age_group_id,
+        batch_size,
+        name_instructor,
+        price,
+      ]
+    );
+
+    // Check if the insert was successful
+    if (insertBatch.rowCount > 0) {
+      return res.status(200).send({
+        success: true,
+        message: "Batch created successfully",
+        data: insertBatch.rows[0],
+      });
+    } else {
+      return res.status(400).send({
+        success: false,
+        message: "Something went wrong while creating the batch",
+      });
+    }
+  } catch (error) {
+    console.log("error", error.message);
+    return res.status(500).send({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+module.exports.getbatch = async (req, res) => {
+  try {
+    const getbatchs = await db.query("select *from heyplay_batch_master");
+    if (getbatchs.rowCount > 0) {
+      res.status(200).send({
+        success: true,
+        message: "batches get successfull",
+        body: getbatchs.rows,
+      });
+    } else {
+      res.status(200).send({
+        success: false,
+        message: "No batches found",
+        body: getbatchs.rows,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(200).send({
+      success: false,
+      message: "server not response",
+    });
+  }
+};
