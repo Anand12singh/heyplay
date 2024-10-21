@@ -744,12 +744,14 @@ module.exports.getclass = async (req, res) => {
 module.exports.addclassjoing = async (req, res) => {
   try {
     const addclassjoingc = await db.query(
-      `SELECT addclass.id,addclass.class_name,addclass.status,cat.category_name,hcg.class_format,cm.class_mode,COALESCE(batch.id, 0) as batch_id  
+      `SELECT addclass.id, addclass.class_name, addclass.status, cat.category_name, hcg.class_format, cm.class_mode, 
+        COUNT(batch.id) AS batch_count  -- Count the number of batches per class
        FROM heyplay_add_class AS addclass
        LEFT JOIN heyplay_category AS cat ON addclass.class_category = cat.id
        LEFT JOIN heyplay_class_formate_master AS hcg ON addclass.class_formate = hcg.id
-       LEFT JOIN heyplay_class_mode AS cm ON addclass.class_mode =cm.id
-       LEFT JOIN heyplay_batch_master AS batch ON addclass.id=batch.class_name_id     
+       LEFT JOIN heyplay_class_mode AS cm ON addclass.class_mode = cm.id
+       LEFT JOIN heyplay_batch_master AS batch ON addclass.id = batch.class_name_id
+       GROUP BY addclass.id, cat.category_name, hcg.class_format, cm.class_mode  -- Group by all non-aggregated columns
        `
     );
 
