@@ -744,11 +744,12 @@ module.exports.getclass = async (req, res) => {
 module.exports.addclassjoing = async (req, res) => {
   try {
     const addclassjoingc = await db.query(
-      `SELECT addclass.id,addclass.class_name,addclass.status,cat.category_name,hcg.class_format,cm.class_mode
+      `SELECT addclass.id,addclass.class_name,addclass.status,cat.category_name,hcg.class_format,cm.class_mode,COALESCE(batch.id, 0) as batch_id  
        FROM heyplay_add_class AS addclass
        LEFT JOIN heyplay_category AS cat ON addclass.class_category = cat.id
        LEFT JOIN heyplay_class_formate_master AS hcg ON addclass.class_formate = hcg.id
-       LEFT JOIN heyplay_class_mode AS cm ON addclass.class_mode =cm.id     
+       LEFT JOIN heyplay_class_mode AS cm ON addclass.class_mode =cm.id
+       LEFT JOIN heyplay_batch_master AS batch ON addclass.id=batch.class_name_id     
        `
     );
 
@@ -926,5 +927,58 @@ module.exports.getbatch = async (req, res) => {
       success: false,
       message: "server not response",
     });
+  }
+};
+
+//heyplay_batch
+
+module.exports.joingbatch = async (req, res) => {
+  try {
+    const joingbatchs = await db.query(
+      `SELECT 
+          batch.id,
+          batch.batch_name,
+          batch.batch_start_date,
+          batch.batch_end_date,
+          occ.occurrences,
+          array_agg(date.day_name) AS day_names
+       FROM heyplay_batch_master AS batch
+       LEFT JOIN heyplay_occurrence AS occ ON batch.occurrence_id = occ.id
+       LEFT JOIN heyplay_selecte_day AS date 
+         ON date.id = ANY(string_to_array(batch.selected_days_id, ',')::bigint[])
+       GROUP BY batch.id, occ.occurrences`
+    );
+
+    if (joingbatchs.rowCount > 0) {
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB"); // DD-MM-YYYY
+      };
+
+      const formattedResponse = joingbatchs.rows.map((batch) => ({
+        ...batch,
+        batch_name: batch.batch_name || "N/A", // Fallback for null values
+        batch_start_date: formatDate(batch.batch_start_date),
+        batch_end_date: formatDate(batch.batch_end_date),
+      }));
+
+      res.status(200).send({
+        success: true,
+        message: "Batch data retrieved successfully",
+        data: formattedResponse,
+      });
+    } else {
+      res.status(200).send({
+        success: false,
+        message: "No record found",
+        data: [],
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Server error",
+    });
+    console.log("error ", error.message);
   }
 };

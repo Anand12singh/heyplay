@@ -92,9 +92,12 @@ route.post(
 );
 route.get("/getclass", verifyToken, mastercontroller.getclass);
 route.get("/getaddjoin", verifyToken, mastercontroller.addclassjoing);
+//
 route.post("/addselected", verifyToken, mastercontroller.addselectday);
 route.get("/getselected", verifyToken, mastercontroller.getaddday);
+//
 route.post("/addbatch", verifyToken, mastercontroller.addbatchmaster);
 route.get("/getbatch", verifyToken, mastercontroller.getbatch);
+route.get("/joingbatchs", verifyToken, mastercontroller.joingbatch);
 
 module.exports = route;
